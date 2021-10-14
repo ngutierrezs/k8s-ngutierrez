@@ -1,6 +1,6 @@
-#Practica 3. Unidad 4. Diseño de aplicaciones
+# Practica 3. Unidad 4. Diseño de aplicaciones
 
-##Parte 1: Etiquetas/anotaciones
+## Parte 1: Etiquetas/anotaciones
 
 Partimos del deployment de la practica de la unidad anterior. Ya teníamos una etiqueta:
 
@@ -44,7 +44,7 @@ k8s4arch-hotels-89df8c6cc-klnlx   1/1     Running   1 (3m28s ago)   9d    app=k8
 k8s4arch-hotels-89df8c6cc-5hf9w   1/1     Running   1 (3m28s ago)   9d    app=k8s4arch-hotels,pod-template-hash=89df8c6cc
 k8s4arch-hotels-89df8c6cc-9j7pr   1/1     Running   1 (3m28s ago)   9d    app=k8s4arch-hotels,pod-template-hash=89df8c6cc,type=monolith
 ```
-##Parte 2: Estrategia de despliegue
+## Parte 2: Estrategia de despliegue
 
 Como ya hicimos en la práctica anterior mantenemos la estrategia de despliegue en RollingUpdate con el número máximo de pods no disponibles a 0 para garantizar la alta disponibilidad.
 
@@ -69,7 +69,7 @@ k8s4arch-hotels-57c8b496bb-ksc4v   1/1     Running   0          17s   app=k8s4ar
 k8s4arch-hotels-57c8b496bb-7ldlq   1/1     Running   0          14s   app=k8s4arch-hotels,pod-template-hash=57c8b496bb,type=monolith,version=v2
 ```
 
-##Parte 3: Probes
+## Parte 3: Probes
 
 Tal y como nos dice el enunciado del ejercicio añadimos una readiness probe para que compruebe la salud de la aplicación antes de redirigir el tráfico:
 
@@ -121,7 +121,7 @@ uk logs -f k8s4arch-hotels-66c6fccf4-x255f -n unit3
 192.168.64.3 - - [14/Oct/2021:04:58:25 +0000] "GET / HTTP/1.1" 200 2156 "-" "kube-probe/1.22+" "-"
 192.168.64.3 - - [14/Oct/2021:04:58:28 +0000] "GET / HTTP/1.1" 200 2156 "-" "kube-probe/1.22+" "-"
 ```
-##Parte 4: Aplicaciones efímeras. Jobs y cronjobs
+## Parte 4: Aplicaciones efímeras. Jobs y cronjobs
 
 En este caso y como es un ambiente bajo prueba generamos otro namespace para ello (unit4). En este namespace vamos a tener un cronjob que ejecutará un job a las 2AM con el reporte de aplicación:
 
