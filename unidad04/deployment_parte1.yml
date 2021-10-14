@@ -1,0 +1,29 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  creationTimestamp: null
+  labels:
+    app: k8s4arch-hotels
+  name: k8s4arch-hotels
+spec:
+  replicas: 3
+  selector:
+    matchLabels:
+      app: k8s4arch-hotels
+  strategy: 
+    type: RollingUpdate
+    rollingUpdate:
+      maxSurge: 1
+      maxUnavailable: 0 
+  template:
+    metadata:
+      creationTimestamp: null
+      labels:
+        app: k8s4arch-hotels
+        type: monolith
+    spec:
+      containers:
+      - image: ghcr.io/go-elevate/k8s4arch-hotels:monolith
+        name: k8s4arch-hotels
+        resources: {}
+status: {}
