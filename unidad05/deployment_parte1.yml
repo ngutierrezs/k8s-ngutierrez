@@ -1,0 +1,46 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  creationTimestamp: null
+  labels:
+    app: k8s4arch-hotels-backend
+  name: k8s4arch-hotels-backend
+spec:
+  replicas: 3
+  selector:
+    matchLabels:
+      app: k8s4arch-hotels-backend
+  strategy: 
+    type: RollingUpdate
+    rollingUpdate:
+      maxSurge: 1
+      maxUnavailable: 0 
+  template:
+    metadata:
+      creationTimestamp: null
+      labels:
+        app: k8s4arch-hotels-backend
+        tier: backend
+        version: slim
+    spec:
+      containers:
+      - image: ghcr.io/go-elevate/k8s4arch-hotels-backend:slim
+        name: k8s4arch-hotels
+        ports:
+        - containerPort: 5000
+        envFrom:
+        - configMapRef:
+            name: db-config 
+        resources: {}
+        readinessProbe:
+          httpGet:
+            path: /status
+            port: 5000
+          initialDelaySeconds: 30
+          periodSeconds: 3
+        livenessProbe:
+          tcpSocket:
+            port: 5000
+          initialDelaySeconds: 30
+          periodSeconds: 3  
+status: {}
