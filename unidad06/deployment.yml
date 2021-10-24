@@ -1,0 +1,89 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  creationTimestamp: null
+  labels:
+    app: k8s4arch-hotels
+  name: k8s4arch-hotels
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: k8s4arch-hotels
+  strategy: 
+    type: RollingUpdate
+    rollingUpdate:
+      maxSurge: 1
+      maxUnavailable: 0 
+  template:
+    metadata:
+      creationTimestamp: null
+      labels:
+        app: k8s4arch-hotels
+        tier: backend-fronted
+        version: slim
+    spec:
+      initContainers:
+      - image: ghcr.io/go-elevate/k8s4arch-hotels-backend:slim
+        name: db-migrations
+        envFrom:
+        - configMapRef:
+            name: db-config
+        volumeMounts:
+          - name: db
+            mountPath: /db
+        command: ["python"]
+        args: ["migrations.py"]
+      containers:
+      - image: ghcr.io/go-elevate/k8s4arch-hotels-backend:slim
+        name: k8s4arch-hotels-backend
+        ports:
+        - containerPort: 5000
+        envFrom:
+        - configMapRef:
+            name: db-config
+        volumeMounts:
+          - name: db
+            mountPath: /db
+        resources: 
+          requests:
+            cpu: "0.2"
+            memory: "500Mi"
+          limits:
+            cpu: "0.5"
+            memory: "1Gi"
+        readinessProbe:
+          httpGet:
+            path: /status
+            port: 5000
+          initialDelaySeconds: 10
+          periodSeconds: 3
+        livenessProbe:
+          tcpSocket:
+            port: 5000
+          initialDelaySeconds: 10
+          periodSeconds: 3  
+      - image: ghcr.io/go-elevate/k8s4arch-hotels-frontend:slim
+        name: k8s4arch-hotels-fronted
+        resources:
+          requests:
+            cpu: "0.2"
+            memory: "500Mi"
+          limits:
+            cpu: "0.5"
+            memory: "1Gi"
+        readinessProbe:
+          httpGet:
+            path: /
+            port: 80
+          initialDelaySeconds: 20
+          periodSeconds: 3
+        livenessProbe:
+          tcpSocket:
+            port: 80
+          initialDelaySeconds: 20
+          periodSeconds: 3
+      volumes:
+      - name: db
+        emptyDir: {}
+status: {}
