@@ -1,0 +1,72 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  creationTimestamp: null
+  labels:
+    app: k8s4arch-hotels-backend
+  name: k8s4arch-hotels-backend
+spec:
+  replicas: 3
+  selector:
+    matchLabels:
+      app: k8s4arch-hotels-backend
+  strategy: 
+    type: RollingUpdate
+    rollingUpdate:
+      maxSurge: 1
+      maxUnavailable: 0 
+  template:
+    metadata:
+      creationTimestamp: null
+      labels:
+        app: k8s4arch-hotels-backend
+        tier: backend
+        version: stable
+    spec:
+      initContainers:
+      - image: ghcr.io/go-elevate/k8s4arch-hotels-backend:stable
+        name: db-migrations
+        envFrom:
+        - configMapRef:
+            name: db-config
+        volumeMounts:
+          - name: db
+            mountPath: /db
+        command: ["python"]
+        args: ["migrations.py"]
+      containers:
+      - image: ghcr.io/go-elevate/k8s4arch-hotels-backend:stable
+        name: k8s4arch-hotels-backend
+        ports:
+        - containerPort: 5000
+          name: http
+          protocol: TCP
+        envFrom:
+        - configMapRef:
+            name: db-config
+        volumeMounts:
+          - name: db
+            mountPath: /db
+        resources: 
+          requests:
+            cpu: "0.1"
+            memory: "250Mi"
+          limits:
+            cpu: "0.2"
+            memory: "500Mi"
+        readinessProbe:
+          httpGet:
+            path: /status
+            port: 5000
+          initialDelaySeconds: 10
+          periodSeconds: 3
+        livenessProbe:
+          tcpSocket:
+            port: 5000
+          initialDelaySeconds: 10
+          periodSeconds: 3  
+      volumes:
+      - name: db
+        persistentVolumeClaim:
+          claimName: backend-pvc
+status: {}

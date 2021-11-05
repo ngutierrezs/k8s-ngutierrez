@@ -1,0 +1,52 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  creationTimestamp: null
+  labels:
+    app: k8s4arch-hotels-frontend
+  name: k8s4arch-hotels-frontend
+spec:
+  replicas: 3
+  selector:
+    matchLabels:
+      app: k8s4arch-hotels-frontend
+  strategy: 
+    type: RollingUpdate
+    rollingUpdate:
+      maxSurge: 1
+      maxUnavailable: 0 
+  template:
+    metadata:
+      creationTimestamp: null
+      labels:
+        app: k8s4arch-hotels-frontend        
+        tier: frontend
+        version: stable
+    spec:
+      containers:
+      - image: ghcr.io/go-elevate/k8s4arch-hotels-frontend:stable
+        name: k8s4arch-hotels-frontend
+        ports:
+        - containerPort: 80
+        env:
+        - name: HOTELS_API_HOST
+          value: "http://api-hotels.internal.itrip.io"
+        resources:
+          requests:
+            cpu: "0.1"
+            memory: "250Mi"
+          limits:
+            cpu: "0.2"
+            memory: "500Mi"
+        readinessProbe:
+          httpGet:
+            path: /
+            port: 80
+          initialDelaySeconds: 20
+          periodSeconds: 3
+        livenessProbe:
+          tcpSocket:
+            port: 80
+          initialDelaySeconds: 20
+          periodSeconds: 3
+status: {}
